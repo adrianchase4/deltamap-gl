@@ -30,6 +30,16 @@ jobs:
       # Trusted publishing needs a recent npm; the one bundled with Node 22 is older.
       - run: npm install -g npm@latest
 
+      # OIDC needs npm >= 11.5.1 and an ACTIONS_ID_TOKEN_REQUEST_URL in the
+      # environment. Print both: an ENEEDAUTH with these present means the
+      # trusted publisher is not configured on npmjs.com, which is invisible
+      # from here otherwise.
+      - name: Publishing preconditions
+        run: |
+          echo "npm  $(npm --version)"
+          echo "node $(node --version)"
+          echo "id-token endpoint present: ${ACTIONS_ID_TOKEN_REQUEST_URL:+yes}${ACTIONS_ID_TOKEN_REQUEST_URL:-NO}"
+
       - run: npm install --no-audit --no-fund
       - run: npx tsc --noEmit -p tsconfig.json
       - run: npm run build
