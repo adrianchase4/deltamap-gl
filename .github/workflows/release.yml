@@ -53,7 +53,21 @@ jobs:
             exit 1
           fi
 
-      - run: npm publish --access public
+      # Two routes. Trusted publishing (OIDC) needs nothing here but does need a
+      # publisher registered on npmjs.com for this package; without one npm does
+      # not attempt the exchange and fails ENEEDAUTH. Setting an NPM_TOKEN secret
+      # takes over if present, so the release is not blocked on that config.
+      - name: Publish
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -n "$NPM_TOKEN" ]; then
+            echo "publishing with NPM_TOKEN"
+            npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN"
+          else
+            echo "publishing with trusted publishing (OIDC)"
+          fi
+          npm publish --access public
 
       - uses: softprops/action-gh-release@v2
         with:
