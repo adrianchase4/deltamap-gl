@@ -1,6 +1,6 @@
 {
   "name": "deltamap-gl",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Declarative MapLibre layers for urban climate visualisation: 3D buildings, tree crowns, sun-accurate shadows, georeferenced rasters and choropleths.",
   "license": "MIT",
   "type": "module",
