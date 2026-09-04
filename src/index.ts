@@ -1,5 +1,5 @@
 /**
- * urban-climate-map — declarative MapLibre layers for urban climate work.
+ * deltamap-gl — declarative MapLibre layers for urban climate work.
  *
  * Minimal use:
  *   <UrbanClimateMap config={{ centre, layers: [...] }}>

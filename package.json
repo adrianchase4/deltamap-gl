@@ -1,5 +1,5 @@
 {
-  "name": "urban-climate-map",
+  "name": "deltamap-gl",
   "version": "0.1.0",
   "description": "Declarative MapLibre layers for urban climate visualisation: 3D buildings, tree crowns, sun-accurate shadows, georeferenced rasters and choropleths.",
   "license": "MIT",
@@ -8,6 +8,7 @@
   "types": "./dist/index.d.ts",
   "files": [
     "dist",
+    "dist-vite",
     "README.md",
     "LICENSE"
   ],
@@ -27,8 +28,9 @@
     "suncalc": "^2.0.2"
   },
   "devDependencies": {
-    "@types/react": "^19.2.7",
     "@types/geojson": "^7946.0.16",
+    "@types/node": "^26.4.1",
+    "@types/react": "^19.2.7",
     "@types/suncalc": "^1.9.2",
     "maplibre-gl": "^6.7.0",
     "react": "^19.2.8",
@@ -39,15 +41,19 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./vite": {
+      "types": "./dist-vite/vite.d.ts",
+      "import": "./dist-vite/vite.js"
     }
   },
   "sideEffects": false,
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.vite.json",
     "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/adrianchase4/urban-climate-map.git"
+    "url": "git+https://github.com/adrianchase4/deltamap-gl.git"
   }
 }

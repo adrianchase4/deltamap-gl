@@ -46,7 +46,7 @@ export const DARK: Theme = {
   font: LIGHT.font,
 }
 
-const STYLE_ID = 'urban-climate-map-styles'
+const STYLE_ID = 'deltamap-gl-styles'
 
 const SHEET = `
 .ucm-btn { cursor: pointer; border: 0; background: transparent; display: flex;

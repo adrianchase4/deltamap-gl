@@ -56,7 +56,7 @@ export function useMapContext(): MapContextValue {
   const value = useContext(MapContext)
   if (!value) {
     throw new Error(
-      'urban-climate-map: this component must be rendered inside <UrbanClimateMap>.',
+      'deltamap-gl: this component must be rendered inside <UrbanClimateMap>.',
     )
   }
   return value
