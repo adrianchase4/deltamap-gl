@@ -10,6 +10,10 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # Declared whether or not npm requires it. If the trusted publisher is
+    # configured with this environment the release fails without it; if it is
+    # configured without one, an extra claim is simply ignored. Safe either way.
+    environment: npm-publish
     permissions:
       contents: write   # create the GitHub release
       id-token: write   # npm trusted publishing, so no NPM_TOKEN is needed
