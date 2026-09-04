@@ -19,10 +19,13 @@ jobs:
       id-token: write   # npm trusted publishing, so no NPM_TOKEN is needed
     steps:
       - uses: actions/checkout@v4
+      # Deliberately no registry-url: setup-node would write an .npmrc with
+      # _authToken=${NODE_AUTH_TOKEN}, and with no token supplied that literal
+      # placeholder shadows OIDC — npm then authenticates as nobody and the
+      # publish fails with a misleading 404.
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          registry-url: https://registry.npmjs.org
 
       # Trusted publishing needs a recent npm; the one bundled with Node 22 is older.
       - run: npm install -g npm@latest
