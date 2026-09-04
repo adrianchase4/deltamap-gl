@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      # The package claims to support MapLibre 4 through 6. Claiming it and
+      # testing it are different things, so build against both ends of the range.
+      matrix:
+        maplibre: ['^4.7.1', '^6.7.0']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm install --no-save maplibre-gl@${{ matrix.maplibre }}
+      - name: Typecheck
+        run: npx tsc --noEmit -p tsconfig.json
+      - name: Build both entry points
+        run: npm run build
+      - name: Both entry points must exist
+        run: test -f dist/index.js && test -f dist-vite/vite.js

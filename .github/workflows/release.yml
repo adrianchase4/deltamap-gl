@@ -1,0 +1,43 @@
+name: Release
+
+# Publishing is deliberately tag-driven, not push-driven: merging to main should
+# not put a new version on the registry. `npm version patch|minor|major` then
+# `git push --follow-tags` is the whole release ritual.
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # create the GitHub release
+      id-token: write   # npm trusted publishing, so no NPM_TOKEN is needed
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing needs a recent npm; the one bundled with Node 22 is older.
+      - run: npm install -g npm@latest
+
+      - run: npm install --no-audit --no-fund
+      - run: npx tsc --noEmit -p tsconfig.json
+      - run: npm run build
+
+      - name: Tag must match package.json
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pkg="$(node -p "require('./package.json').version")"
+          if [ "$tag" != "$pkg" ]; then
+            echo "tag $tag does not match package.json $pkg" >&2
+            exit 1
+          fi
+
+      - run: npm publish --access public
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
