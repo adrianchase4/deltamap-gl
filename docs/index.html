@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>urban-climate-map — documentation</title>
+<meta name="description" content="Declarative MapLibre layers for urban climate work: 3D buildings, tree crowns, sun-accurate shadows, georeferenced rasters and choropleths.">
+<style>
+  :root {
+    --surface: #ffffff; --muted: #f5f5f2; --ink: #1c1b19; --ink-2: #5c5a55;
+    --ink-3: #8a8880; --line: #e3e1dc; --accent: #17513a; --code-bg: #f7f7f4;
+    color-scheme: light;
+  }
+  :root:not([data-theme="light"]) { }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --surface: #1b1a18; --muted: #232220; --ink: #f2f1ee; --ink-2: #b3b1aa;
+      --ink-3: #85837c; --line: #35332f; --accent: #7fc9a3; --code-bg: #232220;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --surface: #1b1a18; --muted: #232220; --ink: #f2f1ee; --ink-2: #b3b1aa;
+    --ink-3: #85837c; --line: #35332f; --accent: #7fc9a3; --code-bg: #232220;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--surface); color: var(--ink);
+    font: 15px/1.65 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 22px; }
+  header.hero { border-bottom: 1px solid var(--line); padding: 64px 0 44px; }
+  h1 { font-size: clamp(30px, 5vw, 44px); margin: 0 0 10px; letter-spacing: -.02em; }
+  .tag { color: var(--ink-2); font-size: 17px; margin: 0 0 22px; max-width: 60ch; }
+  .pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pill {
+    font-size: 12px; padding: 5px 11px; border-radius: 999px;
+    border: 1px solid var(--line); color: var(--ink-2); text-decoration: none;
+  }
+  .pill:hover { border-color: var(--accent); color: var(--accent); }
+  h2 {
+    font-size: 13px; text-transform: uppercase; letter-spacing: .12em;
+    color: var(--accent); margin: 56px 0 14px; font-weight: 600;
+  }
+  h3 { font-size: 17px; margin: 30px 0 8px; letter-spacing: -.01em; }
+  p { margin: 0 0 14px; color: var(--ink-2); max-width: 68ch; }
+  p strong, li strong { color: var(--ink); font-weight: 600; }
+  code {
+    font: 13px/1.5 ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+    background: var(--code-bg); padding: 1.5px 5px; border-radius: 4px;
+  }
+  pre {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px;
+    padding: 15px 17px; overflow-x: auto; margin: 0 0 16px;
+  }
+  pre code { background: none; padding: 0; font-size: 12.5px; line-height: 1.6; }
+  table { border-collapse: collapse; width: 100%; margin: 0 0 18px; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--ink-3); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+  td:first-child { white-space: nowrap; }
+  .note {
+    border-left: 3px solid var(--accent); background: var(--muted);
+    padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 0 0 18px;
+  }
+  .note p:last-child { margin: 0; }
+  figure { margin: 0 0 20px; }
+  figure img { width: 100%; border: 1px solid var(--line); border-radius: 8px; display: block; }
+  figcaption { font-size: 12.5px; color: var(--ink-3); margin-top: 8px; }
+  ul { color: var(--ink-2); padding-left: 20px; max-width: 68ch; }
+  li { margin-bottom: 7px; }
+  footer { border-top: 1px solid var(--line); margin-top: 70px; padding: 26px 0 60px;
+           color: var(--ink-3); font-size: 13px; }
+  .toc { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; margin-top: 20px; }
+  .toc a { color: var(--ink-2); text-decoration: none; }
+  .toc a:hover { color: var(--accent); }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header class="hero"><div class="wrap">
+  <h1>urban-climate-map</h1>
+  <p class="tag">Declarative MapLibre layers for urban climate work — 3D buildings at surveyed
+  heights, tree crowns, sun-accurate cast shadows, georeferenced rasters and choropleths,
+  plus a small React UI kit.</p>
+  <div class="pills">
+    <a class="pill" href="https://github.com/adrianchase4/urban-climate-map">Source</a>
+    <a class="pill" href="https://github.com/adrianchase4/shade-atlas">Example app</a>
+    <a class="pill" href="#start">Get started</a>
+  </div>
+  <div class="toc">
+    <a href="#what">What it is</a><a href="#start">First map</a><a href="#layers">Layers</a>
+    <a href="#ui">UI kit</a><a href="#data">Your data</a><a href="#why">Design notes</a>
+    <a href="#limits">Limits</a>
+  </div>
+</div></header>
+
+<main class="wrap">
+
+<h2 id="what">What this is</h2>
+<p>You describe the layers you want; the package builds the MapLibre sources and layers and
+hands the map back. It does not wrap MapLibre away — anything MapLibre can do, you can still
+do on the instance you get.</p>
+<p><strong>What it is not:</strong> a basemap, a tile server, or a charting library. It draws
+city-scale physical data on a map. If you need a scatter plot, use a chart library.</p>
+
+<figure>
+  <img src="example-map.jpg" alt="Melbourne rendered in 3D with a heat raster on the ground">
+  <figcaption>An app built entirely from this package: 41,701 buildings, 82,064 trees,
+  cast shadows from real solar geometry, and a 30 m Landsat surface-temperature raster
+  under it. The app itself is 371 lines and contains no map code.</figcaption>
+</figure>
+
+<h2 id="start">Install and first map</h2>
+<pre><code>npm install urban-climate-map maplibre-gl react</code></pre>
+<p>Peers are <code>maplibre-gl &gt;=4 &lt;7</code> and <code>react &gt;=18</code>. Import
+MapLibre's stylesheet once, then:</p>
+<pre><code>import 'maplibre-gl/dist/maplibre-gl.css'
+import { UrbanClimateMap, MapControls, StatusBar } from 'urban-climate-map'
+
+export function App() {
+  return (
+    &lt;UrbanClimateMap
+      config={{
+        centre: [144.9558, -37.8136],
+        camera: { zoom: 15, pitch: 55 },
+        sky: true,
+        layers: [
+          { kind: 'buildings', id: 'blds', data: '/data/buildings.geojson' },
+          { kind: 'trees',     id: 'trees', data: '/data/trees.geojson' },
+        ],
+      }}
+    &gt;
+      &lt;MapControls /&gt;
+      &lt;StatusBar label="Melbourne" /&gt;
+    &lt;/UrbanClimateMap&gt;
+  )
+}</code></pre>
+<div class="note"><p>Layers draw in the order you list them, because MapLibre draws in
+insertion order. Put <code>shadows</code> before whatever casts them.</p></div>
+
+<h2 id="layers">Layer kinds</h2>
+<p>Seven kinds. Every one takes an <code>id</code>, optionally <code>hidden</code> to start
+switched off, and optionally <code>sourceId</code> to share one source between layers.</p>
+
+<h3>buildings — extruded to surveyed heights</h3>
+<pre><code>{ kind: 'buildings', id: 'blds', data: '/data/buildings.geojson',
+  ramp: [[0, '#e7e4dd'], [200, '#bab4a7']], opacity: 0.95 }</code></pre>
+<p>Reads a height property, falling back to a podium height then to 4 m. Set the property
+names with <code>fields</code> — see <a href="#data">Your data</a>.</p>
+
+<h3>trees — discs zoomed out, 3D crowns zoomed in</h3>
+<pre><code>{ kind: 'trees', id: 'trees', data: '/data/trees.geojson',
+  crownMinZoom: 16, maxViewportTrees: 900 }</code></pre>
+<p>Pass the point collection to <code>&lt;UrbanClimateMap trees={...}&gt;</code> as well —
+crowns and shadows are generated per viewport and need the features in JavaScript, not only
+in the map. <code>useTreeData(url)</code> loads them.</p>
+
+<h3>shadows — cast from real solar geometry</h3>
+<pre><code>{ kind: 'shadows', id: 'shade', opacity: 0.32 }</code></pre>
+<p>Needs a <code>trees</code> layer to cast from. Drive the time with
+<code>&lt;SunControl /&gt;</code> or the <code>initialDate</code> prop.</p>
+
+<h3>choropleth — polygons coloured by one property</h3>
+<pre><code>{ kind: 'choropleth', id: 'canopy', data: areas, field: 'canopy_pct',
+  ramp: [[0, '#f0f4f1'], [20, '#4a7c59']],
+  outline: { color: '#fff', width: 1 } }</code></pre>
+<p>Choropleth layers are interactive by default: hover and click feed
+<code>&lt;HoverReadout /&gt;</code> and the <code>onSelect</code> prop.</p>
+
+<h3>raster — a georeferenced image over four corners</h3>
+<pre><code>{ kind: 'raster', id: 'heat', url: '/raster/lst.png',
+  corners: [[w, n], [e, n], [e, s], [w, s]], opacity: 0.45 }</code></pre>
+<p>This is how a continuous surface — temperature, greenness, land cover — reaches the map
+without a tile server. One PNG, four coordinates. Past a few thousand pixels a side, use
+real tiles instead.</p>
+<p>If you generate a manifest describing several rasters,
+<code>useRasterManifest(url)</code> turns it into specs <em>and</em> matching legends, so a
+colour ramp cannot drift away from the image it describes.</p>
+
+<h3>fill and ring</h3>
+<pre><code>{ kind: 'fill', id: 'zones', data: '/data/zones.geojson', color: '#3e6f94' }
+{ kind: 'ring', id: 'radius', color: '#17513a', width: 1.6 }</code></pre>
+<p><code>ring</code> starts empty; set its data at runtime to show the radius a measurement
+covers.</p>
+
+<h2 id="ui">UI kit</h2>
+<p>Each of these reads its state from <code>&lt;UrbanClimateMap&gt;</code>, so in an app they
+are one line each.</p>
+<table>
+  <tr><th>Component</th><th>Does</th></tr>
+  <tr><td><code>&lt;MapControls /&gt;</code></td><td>Zoom, recentre, tilt, rotate, compass, auto-orbit. <code>offset</code> clears a sidebar.</td></tr>
+  <tr><td><code>&lt;LayerToggle /&gt;</code></td><td>Switches, keyed by layer id. <code>exclusive</code> for layers that must not stack.</td></tr>
+  <tr><td><code>&lt;Legend /&gt;</code></td><td>Colour ramp with tick labels. Takes a spec, usually from <code>useRasterManifest</code>.</td></tr>
+  <tr><td><code>&lt;HoverReadout /&gt;</code></td><td>Tooltip for the feature under the cursor. You supply the <code>format</code>.</td></tr>
+  <tr><td><code>&lt;SunControl /&gt;</code></td><td>Time and month sliders, plus sun altitude and shadow length. Renders nothing without a shadows layer.</td></tr>
+  <tr><td><code>&lt;StatusBar /&gt;</code></td><td>Place name and live zoom.</td></tr>
+  <tr><td><code>&lt;Notice /&gt;</code></td><td>A caveat attached to what is on screen.</td></tr>
+  <tr><td><code>&lt;Sidebar /&gt;</code>, <code>&lt;Panel /&gt;</code>, <code>&lt;Stat /&gt;</code></td><td>Left column and cards. The column is click-through; only its cards catch the mouse.</td></tr>
+  <tr><td><code>&lt;Hero /&gt;</code>, <code>&lt;Section /&gt;</code>, <code>&lt;InsightGrid /&gt;</code></td><td>Landing-page pieces. <code>Reveal</code> and <code>CountUp</code> respect <code>prefers-reduced-motion</code>.</td></tr>
+</table>
+<p>Components style themselves inline from a theme object. There is no CSS file to import and
+no framework assumed — pass <code>theme={DARK}</code> or your own.</p>
+
+<h2 id="data">Your data, your field names</h2>
+<p>Nothing is hardcoded to one city. Defaults match City of Melbourne open data, because a
+default that works for somebody beats one that works for nobody. Override what differs:</p>
+<pre><code>config={{
+  centre: [lon, lat],
+  fields: { buildingHeight: 'height_m', treeSpecies: 'species', treeDbh: 'dbh_cm' },
+  layers: [ ... ],
+}}</code></pre>
+<p>Share one source across layers so the data loads once:</p>
+<pre><code>{ kind: 'choropleth', id: 'canopy', sourceId: 'areas', data: areas, field: 'canopy_pct', ramp },
+{ kind: 'choropleth', id: 'heat',   sourceId: 'areas', data: areas, field: 'uhi',        ramp },</code></pre>
+
+<figure>
+  <img src="example-open-ground.jpg" alt="Open ground layer clipped to a council boundary">
+  <figcaption>A categorical raster clipped to a council boundary, with its caveat surfaced
+  automatically because the manifest carried one.</figcaption>
+</figure>
+
+<h2 id="why">Three decisions worth knowing</h2>
+
+<h3>Every 3D layer is <code>fill-extrusion</code></h3>
+<p>MapLibre draws extrusions in one depth pass, so they occlude each other correctly. A
+<code>circle</code> layer is a screen-space billboard: it never depth-tests against buildings,
+so tree dots paint over towers and appear to float through them. Cast shadows are a 0.4 m
+extrusion for the same reason — a flat <code>fill</code> is drawn after the extrusion pass
+and would paint across roofs no tree could shade.</p>
+
+<h3>Trees swap render mode at zoom 16</h3>
+<p>Extruded crowns are correct but cost geometry. Below the threshold you get cheap ground
+discs; above it, real 3D. Only trees in the viewport are processed, capped by
+<code>maxViewportTrees</code> — without that cap a wide view over a large inventory rebuilds
+tens of thousands of polygons on every pan.</p>
+
+<h3>Rasters resample <code>nearest</code></h3>
+<p>Smoothing a 30 m measurement invents detail that was never observed. The blocky cells are
+the honest rendering.</p>
+
+<h2 id="limits">Limits</h2>
+<ul>
+  <li><strong>Geometry is equirectangular.</strong> Fine across a few kilometres, wrong across
+  tens. Do not use it near the poles.</li>
+  <li><strong>Solar dates use the viewer's timezone.</strong> A map of Melbourne viewed from
+  London puts the sun in the wrong place unless you build dates with an explicit offset.</li>
+  <li><strong>Crown radii from the built-in species table are display geometry, not a growth
+  model.</strong> Pass <code>crownRadius</code> if you have fitted curves.</li>
+  <li><strong>MapLibre loads sources eagerly.</strong> A hidden layer still downloads its
+  data — do not point one at a large file you are not showing.</li>
+  <li><strong>Vite users:</strong> add <code>optimizeDeps: { exclude: ['maplibre-gl'] }</code>.
+  Pre-bundling rewrites the import of MapLibre's worker without emitting it, and a missing
+  worker silently kills every GeoJSON source while the basemap carries on looking fine.</li>
+</ul>
+
+</main>
+
+<footer><div class="wrap">
+  MIT licensed. Built for Melbourne, written for anywhere.
+  <a href="https://github.com/adrianchase4/urban-climate-map">Source on GitHub</a>.
+</div></footer>
+
+</body>
+</html>

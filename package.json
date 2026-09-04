@@ -1,0 +1,53 @@
+{
+  "name": "urban-climate-map",
+  "version": "0.1.0",
+  "description": "Declarative MapLibre layers for urban climate visualisation: 3D buildings, tree crowns, sun-accurate shadows, georeferenced rasters and choropleths.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "maplibre",
+    "urban-heat",
+    "canopy",
+    "geospatial",
+    "3d",
+    "landsat"
+  ],
+  "peerDependencies": {
+    "maplibre-gl": ">=4 <7",
+    "react": ">=18"
+  },
+  "dependencies": {
+    "suncalc": "^2.0.2"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "@types/geojson": "^7946.0.16",
+    "@types/suncalc": "^1.9.2",
+    "maplibre-gl": "^6.7.0",
+    "react": "^19.2.8",
+    "typescript": "^6.0.3"
+  },
+  "module": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adrianchase4/urban-climate-map.git"
+  }
+}
