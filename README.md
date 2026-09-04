@@ -37,7 +37,7 @@ import { UrbanClimateMap, MapControls, LayerToggle } from 'deltamap-gl'
 </UrbanClimateMap>
 ```
 
-**[Full documentation →](./docs/index.html)** · **[Example app →](https://github.com/adrianchase4/shade-atlas)**
+**[Full documentation →](https://adrianchase4.github.io/deltamap-gl/)**
 
 ## Vite setup
 
