@@ -50,6 +50,7 @@ export const DEFAULT_FIELDS: FieldMap = {
 export type LayerSpec =
   | BuildingsSpec | TreesSpec | ShadowsSpec
   | FillSpec | ChoroplethSpec | RasterSpec | RingSpec
+  | LineSpec | PointsSpec
 
 export interface BaseSpec {
   id: string
@@ -94,7 +95,16 @@ export interface ChoroplethSpec extends BaseSpec {
   kind: 'choropleth'
   data: SourceData
   field: string
-  ramp: RampStop[]
+  /** Colours for a continuous field. Ignored when `categories` is given. */
+  ramp?: RampStop[]
+  /**
+   * Colour by exact value instead of interpolating — for a field holding
+   * classes rather than magnitudes. Interpolating those implies an ordering
+   * and a distance between them that the data does not have.
+   */
+  categories?: Record<string, string>
+  /** Fill for values missing from `categories`. */
+  fallbackColor?: string
   opacity?: number
   outline?: { color: string; width?: number }
   keyField?: string
@@ -115,6 +125,43 @@ export interface RingSpec extends BaseSpec {
   kind: 'ring'
   color?: string
   width?: number
+}
+
+/** Linear features — a road, path or pipe network. */
+export interface LineSpec extends BaseSpec {
+  kind: 'line'
+  data: SourceData
+  color?: string
+  width?: number
+  opacity?: number
+  /** Colour by a numeric property instead of a flat colour. */
+  field?: string
+  ramp?: RampStop[]
+  /** Colour by exact value, for a field holding classes rather than magnitudes. */
+  categories?: Record<string, string>
+  fallbackColor?: string
+}
+
+/**
+ * Point features as screen-space circles.
+ *
+ * Circles are drawn after the depth pass, so they paint over buildings they sit
+ * behind. That is the right trade for a dot map — a marker you cannot see is
+ * worse than one that floats — but it is why `trees` extrudes instead.
+ */
+export interface PointsSpec extends BaseSpec {
+  kind: 'points'
+  data: SourceData
+  color?: string
+  radius?: number
+  opacity?: number
+  strokeColor?: string
+  /** Colour by a numeric property instead of a flat colour. */
+  field?: string
+  ramp?: RampStop[]
+  /** Colour by exact value, for a field holding classes rather than magnitudes. */
+  categories?: Record<string, string>
+  fallbackColor?: string
 }
 
 /**

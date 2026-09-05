@@ -9,8 +9,8 @@
 import type { ExpressionSpecification, Map as MapLibreMap } from 'maplibre-gl'
 import { DEFAULT_BUILDING_RAMP, DEFAULT_CROWN_MIN_ZOOM, EMPTY_GEOJSON } from './config'
 import type {
-  BuildingsSpec, ChoroplethSpec, FieldMap, FillSpec, LayerSpec,
-  RampStop, RasterSpec, RingSpec, ShadowsSpec, SourceData, TreesSpec,
+  BuildingsSpec, ChoroplethSpec, FieldMap, FillSpec, LayerSpec, LineSpec,
+  PointsSpec, RampStop, RasterSpec, RingSpec, ShadowsSpec, SourceData, TreesSpec,
 } from './types'
 
 export const sourceIdFor = (layerId: string) => `${layerId}-src`
@@ -122,12 +122,23 @@ function fill(map: MapLibreMap, spec: FillSpec) {
   })
 }
 
+/** Exact-match colours for a class field, with a fallback for the rest. */
+export function matchExpression(
+  field: string,
+  categories: Record<string, string>,
+  fallback: string,
+) {
+  return ['match', ['get', field], ...Object.entries(categories).flat(), fallback] as unknown as Expr
+}
+
 function choropleth(map: MapLibreMap, spec: ChoroplethSpec) {
   const src = source(map, spec, spec.data)
   add(map, {
     id: spec.id, type: 'fill', source: src, layout: vis(spec),
     paint: {
-      'fill-color': rampExpression(spec.field, spec.ramp),
+      'fill-color': spec.categories
+        ? matchExpression(spec.field, spec.categories, spec.fallbackColor ?? '#cccccc')
+        : rampExpression(spec.field, spec.ramp ?? []),
       'fill-opacity': spec.opacity ?? 0.85,
     },
   })
@@ -166,6 +177,44 @@ function ring(map: MapLibreMap, spec: RingSpec) {
   })
 }
 
+/**
+ * Flat colour, interpolated ramp, or exact-match categories — whichever the
+ * spec asked for. Shared so the three data-driven layers cannot drift apart.
+ */
+function colorFor(spec: LineSpec | PointsSpec, fallback = '#2b6cb0') {
+  if (!spec.field) return spec.color ?? fallback
+  if (spec.categories) {
+    return matchExpression(spec.field, spec.categories, spec.fallbackColor ?? fallback)
+  }
+  return spec.ramp ? rampExpression(spec.field, spec.ramp) : (spec.color ?? fallback)
+}
+
+function line(map: MapLibreMap, spec: LineSpec) {
+  add(map, {
+    id: spec.id, type: 'line', source: source(map, spec, spec.data), layout: vis(spec),
+    paint: {
+      'line-color': colorFor(spec),
+      'line-width': spec.width ?? 1.4,
+      'line-opacity': spec.opacity ?? 0.9,
+    },
+  })
+}
+
+function points(map: MapLibreMap, spec: PointsSpec) {
+  add(map, {
+    id: spec.id, type: 'circle', source: source(map, spec, spec.data), layout: vis(spec),
+    paint: {
+      'circle-color': colorFor(spec),
+      // Grow with zoom, or a city-wide dot map is unreadable at both ends.
+      'circle-radius': ['interpolate', ['linear'], ['zoom'],
+        10, (spec.radius ?? 4) * 0.5, 17, spec.radius ?? 4] as unknown as Expr,
+      'circle-opacity': spec.opacity ?? 0.85,
+      'circle-stroke-width': spec.strokeColor ? 1 : 0,
+      'circle-stroke-color': spec.strokeColor ?? '#ffffff',
+    },
+  })
+}
+
 export function applyLayers(map: MapLibreMap, specs: LayerSpec[], fields: FieldMap) {
   for (const spec of specs) {
     switch (spec.kind) {
@@ -176,6 +225,56 @@ export function applyLayers(map: MapLibreMap, specs: LayerSpec[], fields: FieldM
       case 'choropleth': choropleth(map, spec); break
       case 'raster': raster(map, spec); break
       case 'ring': ring(map, spec); break
+      case 'line': line(map, spec); break
+      case 'points': points(map, spec); break
+    }
+  }
+}
+
+/** Layers a spec creates besides the one named by its id. */
+function companionIds(spec: LayerSpec): string[] {
+  if (spec.kind === 'trees') return [`${spec.id}-trunk`, `${spec.id}-crown`]
+  if (spec.kind === 'choropleth' && spec.outline) return [`${spec.id}-line`]
+  return []
+}
+
+/** Everything about a spec except its data — changing any of it needs a repaint. */
+const styleSignature = (spec: LayerSpec) =>
+  JSON.stringify(spec, (key, value) => (key === 'data' ? undefined : value))
+
+const signatures = new WeakMap<MapLibreMap, Map<string, string>>()
+
+/**
+ * Re-apply specs against a live map.
+ *
+ * `applyLayers` runs once at mount and its adds are idempotent, so it cannot
+ * express a dataset that changes. This reconciles instead: new data is pushed
+ * through `setData` (cheap, keeps the source), while a changed *style* — a
+ * different ramp field, colour or width — drops the layer so it can be rebuilt,
+ * because MapLibre paint properties are set individually and rebuilding is
+ * simpler than diffing them.
+ */
+export function syncLayers(map: MapLibreMap, specs: LayerSpec[], fields: FieldMap) {
+  let seen = signatures.get(map)
+  if (!seen) signatures.set(map, (seen = new Map()))
+
+  for (const spec of specs) {
+    const next = styleSignature(spec)
+    if (seen.get(spec.id) !== next && map.getLayer(spec.id)) {
+      for (const id of [spec.id, ...companionIds(spec)]) {
+        if (map.getLayer(id)) map.removeLayer(id)
+      }
+    }
+    seen.set(spec.id, next)
+  }
+
+  applyLayers(map, specs, fields)
+
+  for (const spec of specs) {
+    if (!('data' in spec) || spec.data == null) continue
+    const src = map.getSource(spec.sourceId ?? sourceIdFor(spec.id))
+    if (src && 'setData' in src) {
+      (src as { setData: (d: SourceData) => void }).setData(spec.data)
     }
   }
 }

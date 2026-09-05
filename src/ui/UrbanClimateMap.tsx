@@ -11,6 +11,7 @@ import type { MapLayerMouseEvent } from 'maplibre-gl'
 import { useMapInstance } from '../hooks/useMapInstance'
 import { useTreeGeometry } from '../hooks/useTreeGeometry'
 import { useOrbit } from '../hooks/useOrbit'
+import { syncLayers } from '../layers'
 import { makeCrownRadius } from '../trees'
 import { sunPosition } from '../sun'
 import { applySunLight } from '../atmosphere'
@@ -130,6 +131,15 @@ export function UrbanClimateMap({
 
   const stopOrbit = useCallback(() => setOrbiting(false), [])
   useOrbit(map, orbiting, stopOrbit)
+
+  // Layers are added once at mount, so a config whose data or styling changes
+  // later would otherwise be ignored. Reconciling here is what lets a caller
+  // swap datasets without tearing the map down.
+  useEffect(() => {
+    const m = map.current
+    if (!m || !ready) return
+    syncLayers(m, config.layers, { ...DEFAULT_FIELDS, ...config.fields })
+  }, [map, ready, config.layers, config.fields])
 
   // Hover and click, bound per interactive layer so the readout knows which
   // feature is under the cursor rather than guessing from a map-wide event.

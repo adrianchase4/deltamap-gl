@@ -61,7 +61,9 @@ export default defineConfig({
 | `buildings` | `fill-extrusion` from a height property, with a height colour ramp |
 | `trees` | flat ground discs zoomed out, extruded trunk and crown zoomed in |
 | `shadows` | ground shadows cast by tree crowns, from real solar position |
-| `choropleth` | polygons coloured by one numeric property, hover and click wired |
+| `choropleth` | polygons coloured by one property — a numeric `ramp`, or `categories` for classes |
+| `line` | linear features, flat or coloured by a property |
+| `points` | point features as circles that scale with zoom |
 | `raster` | a georeferenced image over four corners — no tile server needed |
 | `fill` | a plain filled polygon layer |
 | `ring` | a dashed circle, for the radius a measurement covers |
